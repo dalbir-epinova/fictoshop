@@ -13,6 +13,7 @@
   const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
   const elements = {
+    floatingCart: document.getElementById('cart'),
     heroStats: {
       products: document.getElementById('hero-stat-products'),
       avgPrice: document.getElementById('hero-stat-avg-price'),
@@ -265,18 +266,18 @@
     qty.addEventListener('change', () => {
       qty.value = clampQuantity(qty.value, qty.max);
     });
+    const plus = document.createElement('button');
+    plus.type = 'button';
+    plus.className = 'quantity-btn';
+    plus.textContent = '+';
+    plus.addEventListener('click', () => adjustQuantity(qty, 1));
+
     if (product.in_stock === 0) {
       qty.disabled = true;
       minus.disabled = true;
       plus.disabled = true;
       qtyControl.classList.add('disabled');
     }
-
-    const plus = document.createElement('button');
-    plus.type = 'button';
-    plus.className = 'quantity-btn';
-    plus.textContent = '+';
-    plus.addEventListener('click', () => adjustQuantity(qty, 1));
 
     qtyControl.append(minus, qty, plus);
     controls.appendChild(qtyControl);
@@ -323,6 +324,7 @@
     if (!elements.cartItems) return;
     elements.cartItems.innerHTML = '';
     const items = state.cart?.items || [];
+    if (elements.floatingCart) elements.floatingCart.hidden = items.length === 0;
 
     if (items.length === 0) {
       if (elements.cartEmpty) elements.cartEmpty.hidden = false;
@@ -471,27 +473,9 @@
     }
   }
 
-  async function onCheckout() {
+  function onCheckout() {
     if (!state.cart?.items?.length) return;
-    if (elements.checkout) {
-      elements.checkout.disabled = true;
-      elements.checkout.textContent = 'Processing…';
-    }
-    try {
-      const summary = await request('/checkout', { method: 'POST' });
-      const lines = summary.items
-        .map((item) => `${item.quantity}× ${item.product.name} (${currencyFormatter.format(item.line_total)})`)
-        .join(', ');
-      showToast(`Checkout simulated: ${lines}`);
-    } catch (error) {
-      showToast(error.message, 'error');
-      if (elements.cartMessage) elements.cartMessage.textContent = error.message;
-    } finally {
-      if (elements.checkout) {
-        elements.checkout.disabled = state.cart?.items?.length === 0;
-        elements.checkout.textContent = 'Checkout demo';
-      }
-    }
+    window.location.assign(`${API_BASE}/checkout`);
   }
 
   async function init() {

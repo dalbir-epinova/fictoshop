@@ -22,6 +22,7 @@
     productSearch: document.getElementById('product-search'),
     productSort: document.getElementById('product-sort'),
     productFilterStock: document.getElementById('product-in-stock'),
+    cartContainer: document.getElementById('cart'),
     cartLoading: document.getElementById('cart-loading'),
     cartItems: document.getElementById('cart-items'),
     cartEmpty: document.getElementById('cart-empty'),
@@ -169,7 +170,10 @@
     imageLink.href = detailHref;
     imageLink.className = 'product-card-media';
     const img = document.createElement('img');
-    img.src = product.image_url || '/images/pic6.jpg';
+    img.src = product.image_url || '/assets/css/images/boxing_gloves.jpg';
+    img.addEventListener('error', () => {
+      img.src = '/assets/css/images/boxing_gloves.jpg';
+    }, { once: true });
     img.alt = `${product.name} photo`;
     img.width = 150;
     img.height = 150;
@@ -234,18 +238,18 @@
     qty.addEventListener('change', () => {
       qty.value = clampQuantity(qty.value, qty.max);
     });
+    const plus = document.createElement('button');
+    plus.type = 'button';
+    plus.className = 'quantity-btn';
+    plus.textContent = '+';
+    plus.addEventListener('click', () => adjustQuantity(qty, 1));
+
     if (product.in_stock === 0) {
       qty.disabled = true;
       minus.disabled = true;
       plus.disabled = true;
       qtyControl.classList.add('disabled');
     }
-
-    const plus = document.createElement('button');
-    plus.type = 'button';
-    plus.className = 'quantity-btn';
-    plus.textContent = '+';
-    plus.addEventListener('click', () => adjustQuantity(qty, 1));
 
     qtyControl.append(minus, qty, plus);
     controls.appendChild(qtyControl);
@@ -292,6 +296,7 @@
     if (!elements.cartItems) return;
     elements.cartItems.innerHTML = '';
     const items = state.cart?.items || [];
+    if (elements.cartContainer) elements.cartContainer.hidden = items.length === 0;
 
     if (items.length === 0) {
       if (elements.cartEmpty) elements.cartEmpty.hidden = false;
@@ -440,27 +445,9 @@
     }
   }
 
-  async function onCheckout() {
+  function onCheckout() {
     if (!state.cart?.items?.length) return;
-    if (elements.checkout) {
-      elements.checkout.disabled = true;
-      elements.checkout.textContent = 'Processing…';
-    }
-    try {
-      const summary = await request('/checkout', { method: 'POST' });
-      const lines = summary.items
-        .map((item) => `${item.quantity}× ${item.product.name} (${currencyFormatter.format(item.line_total)})`)
-        .join(', ');
-      showToast(`Checkout simulated: ${lines}`);
-    } catch (error) {
-      showToast(error.message, 'error');
-      if (elements.cartMessage) elements.cartMessage.textContent = error.message;
-    } finally {
-      if (elements.checkout) {
-        elements.checkout.disabled = state.cart?.items?.length === 0;
-        elements.checkout.textContent = 'Checkout demo';
-      }
-    }
+    window.location.assign('/checkout');
   }
 
   async function init() {

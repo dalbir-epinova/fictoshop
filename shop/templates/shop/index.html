@@ -11,7 +11,7 @@
       <p>Your provider of sports equipment</p>
       <div class="hero-actions">
         <a class="btn primary" href="#catalog">Shop the catalog</a>
-        <a class="btn ghost" href="/docs">Explore the API</a>
+        <a class="btn ghost" href="/products">Explore the API</a>
       </div>
       {% if request.user.is_authenticated %}
       <p class="muted small signed-in-banner">
@@ -88,13 +88,13 @@
   <div id="product-grid" class="product-grid" aria-live="polite" aria-busy="true"></div>
 </section>
 
-<section class="cart-layout" id="cart" aria-labelledby="cart-title">
+<section class="cart-layout floating-cart" id="cart" aria-labelledby="cart-title" hidden>
   <article class="content-section cart-panel">
     <div class="section-header">
       <div>
-        <h2 id="cart-title">Your shopping cart</h2>
+        <h2 id="cart-title">Shopping cart</h2>
       </div>
-      <p class="section-subtitle">Change quantities or remove products directly from this panel.</p>
+      <p class="section-subtitle">Review your items while you shop.</p>
     </div>
     <div id="cart-loading" class="loading-card">Fetching cart details…</div>
     <ul id="cart-items" class="cart-items" aria-live="polite" aria-busy="true"></ul>
@@ -102,7 +102,7 @@
     <p id="cart-message" class="muted small" role="status" aria-live="polite"></p>
   </article>
   <aside class="cart-summary content-section accent" aria-label="Cart summary">
-    <h3>Order summary</h3>
+    <h3 class="visually-hidden">Order summary</h3>
     <div class="cart-summary-row">
       <span>Total items</span>
       <strong id="cart-total-items">0</strong>
@@ -112,7 +112,7 @@
       <strong id="cart-grand-total">$0.00</strong>
     </div>
     <div class="cart-actions">
-      <button id="clear-cart" class="btn ghost" type="button">Clear cart</button>
+      <button id="clear-cart" class="btn ghost" type="button">Clear</button>
       <button id="checkout" class="btn primary" type="button">Checkout</button>
     </div>
     <p class="muted small">

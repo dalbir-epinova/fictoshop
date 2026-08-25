@@ -103,6 +103,11 @@ class Storefront:
             self._cart.clear()
             return self.get_cart()
 
+    def quantities(self) -> Dict[int, int]:
+        """Return a copy so order placement can validate the current cart safely."""
+        with self._lock:
+            return dict(self._cart)
+
     def reserved_quantity(self, product_id: int) -> int:
         with self._lock:
             return self._cart.get(product_id, 0)

@@ -1,0 +1,28 @@
+{% extends "shop/base.html" %}
+
+{% block title %}Fictoshop · Order confirmed{% endblock %}
+
+{% block content %}
+<section class="content-section confirmation" aria-labelledby="confirmation-title">
+  <p class="eyebrow">Order #{{ order.id }}</p>
+  <h1 id="confirmation-title">Your order was placed successfully</h1>
+  <p>Thank you, {{ order.full_name }}. Here is a summary of your purchase.</p>
+  <div class="confirmation-grid">
+    <section aria-labelledby="ordered-items-title">
+      <h2 id="ordered-items-title">Ordered items</h2>
+      <ul class="summary-lines">
+        {% for item in order.items.all %}
+        <li><span><strong>{{ item.product_name }}</strong><br>${{ item.unit_price }} × {{ item.quantity }}</span><strong>${{ item.line_total }}</strong></li>
+        {% endfor %}
+      </ul>
+      <div class="summary-total"><span>Order total</span><strong>${{ order.total_amount }}</strong></div>
+    </section>
+    <section aria-labelledby="delivery-title">
+      <h2 id="delivery-title">Shipping details</h2>
+      <address><strong>{{ order.full_name }}</strong><br>{{ order.address }}<br>{{ order.postal_code }} {{ order.city }}<br>{{ order.country }}</address>
+      <p><a href="mailto:{{ order.email }}">{{ order.email }}</a><br>{{ order.phone }}</p>
+    </section>
+  </div>
+  <a class="btn primary" href="/">Back to storefront</a>
+</section>
+{% endblock %}

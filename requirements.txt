@@ -1,0 +1,7 @@
+Django==5.2.17
+djangorestframework==3.18.0
+Pillow==12.3.0
+playwright==1.62.0
+pytest==8.4.2
+pytest-bdd==8.1.0
+pytest-playwright==0.9.0

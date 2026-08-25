@@ -1,0 +1,37 @@
+{% extends "shop/base.html" %}
+
+{% block title %}Fictoshop · Shipping details{% endblock %}
+
+{% block content %}
+<section class="content-section checkout-shell" aria-labelledby="shipping-title">
+  <div class="section-header">
+    <div><p class="eyebrow">Checkout</p><h1 id="shipping-title">Shipping details</h1></div>
+    <p class="section-subtitle">Enter the details needed to deliver your order.</p>
+  </div>
+  {% if stock_error %}<p class="form-error" role="alert">{{ stock_error }}</p>{% endif %}
+  <div class="checkout-grid">
+    <form class="shipping-form" method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+      <label for="{{ field.id_for_label }}">
+        <span class="label">{{ field.label }}</span>{{ field }}
+        {% for error in field.errors %}<span class="field-error" role="alert">{{ error }}</span>{% endfor %}
+      </label>
+      {% endfor %}
+      <div class="checkout-actions">
+        <a class="btn ghost" href="/#cart">Back to cart</a>
+        <button class="btn primary" type="submit">Place order</button>
+      </div>
+    </form>
+    <aside class="order-summary checkout-summary" aria-label="Order summary">
+      <h2>Order summary</h2>
+      <ul class="summary-lines">
+        {% for item in cart.items %}
+        <li><span><strong>{{ item.product.name }}</strong><br>{{ item.quantity }} × ${{ item.product.price }}</span><strong>${{ item.line_total }}</strong></li>
+        {% endfor %}
+      </ul>
+      <div class="summary-total"><span>Total</span><strong>${{ cart.grand_total }}</strong></div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

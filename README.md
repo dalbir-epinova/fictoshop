@@ -1,93 +1,178 @@
-# Fictoshop Storefront (Django)
+# Fictoshop Storefront
 
-Sports-focused storefront implemented with Django and vanilla frontend assets. The UI mirrors the original FastAPI demo but now follows Django best practices with reusable templates, modular CSS, and a simple in-memory cart backed by database products.
+Fictoshop is a Django storefront with a vanilla HTML, CSS, and JavaScript frontend. It includes a product catalog, reviews, a persistent floating cart, checkout with shipping details, stored orders, an order confirmation page, and Django administration.
+
+## Main features
+
+- Product catalog with search, sorting, stock status, and product details
+- Product reviews for signed-in users
+- Floating cart that remains visible while it contains products
+- Checkout form for customer and shipping information
+- Persistent orders and order-item snapshots in SQLite
+- Stock reduction after a successful order
+- Session-protected order confirmation page
+- Django admin for products and orders
+- Django unit and integration tests
+- Playwright browser tests written in Python
 
 ## Project structure
 
-```
-├── assets/                # Frontend assets (CSS/JS/images)
-├── images/uploads/        # Media uploaded via Django admin (product photos)
-├── shop/
-│   ├── templates/shop/
-│   │   ├── base.html      # Shared layout (header/footer/global chrome)
-│   │   └── index.html     # Storefront homepage extending the base
-│   ├── models.py          # Product model
-│   ├── serializers.py     # DRF serializers for API endpoints
-│   ├── storefront.py      # In-memory cart logic
-│   ├── views.py           # API views + login/logout endpoints
-│   └── urls.py            # App routes
-└── manage.py
+```text
+assets/                 Frontend CSS, JavaScript, and images
+fictoshop_django/       Django project settings and root URLs
+images/uploads/         Product images uploaded through Django admin
+mobile-web/             Web bundle used by the mobile applications
+playwright-python/      Playwright end-to-end tests using pytest
+shop/                   Storefront Django application
+  migrations/           Database migrations
+  templates/shop/       Django templates
+  admin.py              Product and order administration
+  forms.py              Checkout form
+  models.py             Products, reviews, orders, and order items
+  storefront.py         In-memory cart logic
+  tests.py              Unit and integration tests
+  views.py              Pages and API endpoints
+manage.py               Django command-line entry point
+requirements.txt        Python dependencies for the complete project
 ```
 
 ## Prerequisites
 
-- Python 3.12 (matching the repo's runtime)
-- pip / virtualenv or Conda
+- Python 3.12
+- pip
+- Git Bash, PowerShell, or another terminal
 
-## Local setup
+## Local setup with Git Bash on Windows
+
+From the project root, create a virtual environment:
 
 ```bash
-# Create virtual environment (example using venv)
 python -m venv .venv
-source .venv/bin/activate
+```
 
-# Install dependencies
-pip install -r requirements.txt
+Activate it:
 
-# Apply migrations and seed the database
+```bash
+source .venv/Scripts/activate
+```
+
+Install all backend and testing dependencies:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Apply database migrations:
+
+```bash
 python manage.py migrate
-python manage.py loaddata shop/fixtures/products.json  # optional seed
+```
 
-# Run the development server
+Start the development server:
+
+```bash
 python manage.py runserver
 ```
 
-Visit `http://127.0.0.1:8000/` to see the storefront. The Django admin lives at `/admin/`; make sure to create a superuser and upload product images there (they're stored under `images/uploads/`).
+Open <http://127.0.0.1:8000/> in a browser.
 
-## Mobile bundles
+## Demo data and administration
 
-- The mobile web bundle lives in `mobile-web/` (HTML + assets). iOS references it directly via Xcode; Android needs a copy in `app/src/main/assets/`.
-- To sync into Android assets: from repo root run `bash scripts/sync-mobile-web.sh`. Rebuild the Android app afterward.
-- Set the API base in `mobile-web/index.html` via `data-api-base`. For Android emulator, use `http://10.0.2.2:8000`. For iOS simulator, use `http://127.0.0.1:8000` or your Mac's LAN IP if testing on device.
+After migrations, the development bootstrap creates sample products when the catalog is empty. It also creates a development superuser if no superuser exists.
 
-## iOS app (WKWebView)
+Default development credentials:
 
-- Project lives in `ios-app/`. The app loads the bundled `mobile-web` folder via a folder reference.
-- Dev HTTP: ATS exceptions are enabled in the project. Point `data-api-base` to a reachable host for your simulator/device (e.g., LAN IP for real device).
-- Build/run from Xcode; the bottom bar provides back/reload/forward.
+```text
+Username: admin
+Password: admin123
+```
 
-## Android app (WebView)
+Open <http://127.0.0.1:8000/admin/> to manage products and view orders. Do not use the default credentials in a deployed environment. They can be overridden before migration with `FICTOSHOP_ADMIN_USER` and `FICTOSHOP_ADMIN_PASSWORD`.
 
-- Project lives in `android-app/`. The WebView loads `file:///android_asset/index.html`.
-- Before building, sync `mobile-web/` into `app/src/main/assets/` using `bash scripts/sync-mobile-web.sh`.
-- Dev HTTP: manifest allows cleartext + INTERNET permission. For local backend, start Django and use `http://10.0.2.2:8000` as `data-api-base`.
+To create another superuser interactively:
 
-## Frontend workflow
+```bash
+python manage.py createsuperuser
+```
 
-- Global styles live in `assets/css/index.css`. Components (hero, catalog, cart) are grouped by section, and reusable colors/spacing tokens are defined under `:root`.
-- `shop/templates/shop/base.html` contains global chrome. Individual views (`index.html`, login, product detail, etc.) only worry about their unique content blocks.
-- `assets/js/storefront.js` powers filters, cart interactions, and hero stats. The script expects the `data-api-base` attribute on the `<body>` element and the toast container present in `index.html`.
+## Storefront and checkout
 
-## Testing
+The cart is maintained in memory for this demo application. When it contains products, a compact cart appears at the bottom-right of the storefront and stays visible while the page scrolls.
 
-Current project uses Django's default test runner. To execute any written tests:
+Checkout collects the customer's name, email, telephone number, and shipping address. A successful checkout:
+
+1. Creates an `Order` in the `orders` database table.
+2. Creates an `OrderItem` snapshot for every cart line.
+3. Reduces product stock.
+4. Clears the cart.
+5. Redirects the customer to a session-protected confirmation page.
+
+Because the cart is currently stored in application memory, it is intended for local development and demonstration rather than production deployment.
+
+## Django tests
+
+Run the unit and integration tests with Django's test runner:
 
 ```bash
 python manage.py test
 ```
 
-Add unit tests under `shop/tests.py` as you add new behavior.
+The tests use a temporary test database and do not modify `db.sqlite3`.
 
-## End-to-end tests (Playwright + pytest-bdd)
+## Playwright tests
 
-- Install deps: `python -m pip install -r playwright_tests/requirements.txt`
-- Install browser runtime: `python -m playwright install chromium`
-- Run the Django server locally (default `http://127.0.0.1:8000`)
-- Execute tests headless: `pytest playwright_tests`
-- Headed mode: `pytest playwright_tests --headed`
+Playwright tests are located in `playwright-python/` and use Python with pytest.
 
-## Conventions
+Install the Chromium browser runtime once:
 
-- Use Django templates + `{% static %}` for asset references.
-- Keep media uploads inside `images/uploads/` so `MEDIA_URL` serves them automatically.
-- When adding new pages, prefer extending `shop/base.html` to keep navigation and global styles consistent.
+```bash
+python -m playwright install chromium
+```
+
+Start Django in one terminal:
+
+```bash
+python manage.py runserver
+```
+
+In a second terminal, activate the same virtual environment and run Playwright headlessly:
+
+```bash
+python -m pytest playwright-python
+```
+
+To display the browser during the test:
+
+```bash
+python -m pytest playwright-python --headed
+```
+
+The tests use `http://127.0.0.1:8000` by default. Set `FICTOSHOP_BASE_URL` to target a different environment.
+
+## API endpoints
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/products` | List products |
+| `GET` | `/products/<id>` | Retrieve one product |
+| `POST` | `/cart` | Add a product to the cart |
+| `GET` | `/cart` | Retrieve the cart |
+| `DELETE` | `/cart/<id>` | Remove a cart line |
+| `DELETE` | `/cart` | Clear the cart |
+| `GET`, `POST` | `/checkout` | Display or submit shipping details |
+
+## Mobile bundles
+
+- The shared mobile web bundle is located in `mobile-web/`.
+- Android loads it from `android-app/app/src/main/assets/`.
+- Synchronize the bundle with `bash scripts/sync-mobile-web.sh` before rebuilding Android.
+- Use `http://10.0.2.2:8000` for the Android emulator API base.
+- iOS can use `http://127.0.0.1:8000` in the simulator or the computer's LAN address on a physical device.
+
+## Development conventions
+
+- Extend `shop/templates/shop/base.html` when adding pages.
+- Keep shared styles in `assets/css/index.css`.
+- Keep storefront behavior in `assets/js/storefront.js`.
+- Store uploaded product media under `images/uploads/`.
+- Add backend tests to `shop/tests.py` and browser tests to `playwright-python/`.

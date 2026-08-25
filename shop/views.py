@@ -5,7 +5,8 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth import authenticate, login, logout
-from django.db.models import Avg, Count
+from django.db import transaction
+from django.db.models import Avg, Count, F
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -15,7 +16,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Product, Review
+from .forms import CheckoutForm
+from .models import Order, OrderItem, Product, Review
 from .serializers import (
     CartActionSerializer,
     CartSerializer,
@@ -112,7 +114,7 @@ class MetaView(APIView):
         return Response(
             {
                 "message": "Welcome to Fictoshop",
-                "docs": "/docs",
+                "docs": "/products",
                 "login": "/login",
                 "products": "/products",
                 "cart": "/cart",
@@ -204,12 +206,62 @@ class CartItemView(APIView):
         return Response(serializer.data)
 
 
-class CheckoutView(APIView):
-    permission_classes = [AllowAny]
+def checkout_view(request):
+    """Collect shipping details and atomically turn the cart into an order."""
+    cart = storefront.get_cart()
+    if cart.total_items == 0:
+        return redirect("storefront")
 
-    def post(self, request, *args, **kwargs):
-        cart = storefront.get_cart()
-        if cart.total_items == 0:
-            return Response({"detail": "Your cart is empty"}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = CartSerializer(cart)
-        return Response(serializer.data)
+    form = CheckoutForm(request.POST or None)
+    stock_error = ""
+    if request.method == "POST" and form.is_valid():
+        quantities = storefront.quantities()
+        with transaction.atomic():
+            products = {
+                product.id: product
+                for product in Product.objects.select_for_update().filter(id__in=quantities)
+            }
+            unavailable = []
+            for product_id, quantity in quantities.items():
+                product = products.get(product_id)
+                if product is None:
+                    unavailable.append(f"product #{product_id}")
+                elif product.in_stock < quantity:
+                    unavailable.append(product.name)
+            if unavailable:
+                stock_error = f"There is no longer enough stock for {', '.join(unavailable)}. Your cart was not changed."
+            else:
+                total = sum(
+                    (products[product_id].price * quantity for product_id, quantity in quantities.items()),
+                    Decimal("0.00"),
+                )
+                order = form.save(commit=False)
+                order.total_amount = total
+                order.save()
+                for product_id, quantity in quantities.items():
+                    product = products[product_id]
+                    line_total = product.price * quantity
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        product_name=product.name,
+                        unit_price=product.price,
+                        quantity=quantity,
+                        line_total=line_total,
+                    )
+                    Product.objects.filter(pk=product_id).update(in_stock=F("in_stock") - quantity)
+                storefront.clear_cart()
+                request.session["last_order_id"] = order.id
+                return redirect("order-confirmation", order_id=order.id)
+
+    return render(request, "shop/checkout.html", {"form": form, "cart": cart, "stock_error": stock_error})
+
+
+def order_confirmation_view(request, order_id: int):
+    """Only the browser session that placed the order may see its private details."""
+    if request.session.get("last_order_id") != order_id:
+        from django.http import Http404
+
+        raise Http404("Order not found")
+    order = get_object_or_404(Order.objects.prefetch_related("items"), pk=order_id)
+    return render(request, "shop/order_confirmation.html", {"order": order})

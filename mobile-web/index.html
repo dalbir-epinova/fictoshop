@@ -93,11 +93,11 @@
           <div id="product-grid" class="product-grid" aria-live="polite" aria-busy="true"></div>
         </section>
 
-        <section class="cart-layout" id="cart" aria-labelledby="cart-title">
+        <section class="cart-layout floating-cart" id="cart" aria-labelledby="cart-title" hidden>
           <article class="content-section cart-panel">
             <div class="section-header">
               <div>
-                <h2 id="cart-title">Your shopping cart</h2>
+                <h2 id="cart-title">Your cart</h2>
               </div>
               <p class="section-subtitle">Change quantities or remove products directly from this panel.</p>
             </div>
@@ -117,8 +117,8 @@
               <strong id="cart-grand-total">$0.00</strong>
             </div>
             <div class="cart-actions">
-              <button id="clear-cart" class="btn ghost" type="button">Clear cart</button>
-              <button id="checkout" class="btn primary" type="button">Checkout</button>
+              <button id="clear-cart" class="btn ghost small" type="button">Clear</button>
+              <button id="checkout" class="btn primary small" type="button">Checkout</button>
             </div>
             <p class="muted small">
               Need to seed products? Authenticate with the admin link and upload a product image straight from your workstation.
