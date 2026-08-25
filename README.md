@@ -176,4 +176,4 @@ The tests use `http://127.0.0.1:8000` by default. Set `FICTOSHOP_BASE_URL` to ta
 - Keep storefront behavior in `assets/js/storefront.js`.
 - Store uploaded product media under `images/uploads/`.
 - Add backend tests to `shop/tests.py` and browser tests to `playwright-python/`.
-# fictoshop 
+# fictoshop #
