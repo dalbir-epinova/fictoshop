@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Fictoshop · Sign in</title>
+    <link rel="stylesheet" href="/assets/css/index.css" />
+  </head>
+  <body class="login-page">
+    <main class="content-section">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Account</p>
+          <h1>Sign in to continue</h1>
+        </div>
+        <p class="section-subtitle">
+          Use your username and password to unlock catalog management or continue browsing the storefront.
+        </p>
+      </div>
+      <form id="login-form" class="login-form">
+        <input id="login-next" type="hidden" value="{{ next_url|default:'' }}" />
+        <label for="login-username">
+          <span class="label">Username</span>
+          <input id="login-username" name="username" type="text" autocomplete="username" required autofocus />
+        </label>
+        <label for="login-password">
+          <span class="label">Password</span>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <div class="login-actions">
+          <button id="login-submit" class="btn primary" type="submit">Log in</button>
+          <a class="btn ghost" href="/">Back to storefront</a>
+        </div>
+        <p id="login-message" class="muted small" role="status" aria-live="polite"></p>
+      </form>
+    </main>
+    <script src="/assets/js/login.js" defer></script>
+  </body>
+</html>

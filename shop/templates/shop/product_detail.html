@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fictoshop · {{ product.name }}</title>
+    <link rel="stylesheet" href="/assets/css/index.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="content-section accent site-header" role="banner">
+        <a class="logo" href="/">Fictoshop</a>
+        <nav id="nav" class="nav-links" aria-label="Primary">
+          <a href="/">Storefront</a>
+          <a href="/#catalog">Catalog</a>
+          <a href="/#cart">Cart</a>
+        </nav>
+        <div class="nav-actions">
+          {% if request.user.is_authenticated %}
+          <span class="nav-user">Signed in as {{ request.user.get_username }}</span>
+          <form class="logout-form" method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="btn primary small" type="submit">Log out</button>
+          </form>
+          {% else %}
+          <a class="btn primary small" href="/signin?next={{ request.path }}">Log in</a>
+          {% endif %}
+          <a class="btn ghost small" href="/meta">API meta</a>
+        </div>
+      </header>
+
+      <main>
+        <section class="content-section accent product-detail-hero">
+          <div class="product-detail-info">
+            <p class="eyebrow">Product</p>
+            <h1>{{ product.name }}</h1>
+            <p class="muted">{{ product.description|default:"No description yet." }}</p>
+            <p class="product-detail-price">${{ product.price }}</p>
+            <p class="product-detail-rating">
+              Average rating:
+              <strong>
+                {% if product.average_rating %}
+                <span class="review-stars" style="--rating: {{ product.average_rating|floatformat:1 }};"></span>
+                {{ product.average_rating|floatformat:1 }} / 5
+                {% else %}
+                No ratings yet
+                {% endif %}
+              </strong>
+              ({{ product.review_count }} reviews)
+            </p>
+            <a class="btn primary" href="#reviews">Jump to reviews</a>
+          </div>
+          {% if product.image_url %}
+          <div class="product-detail-image">
+            <img src="{{ product.image_url.url }}" alt="{{ product.name }} photo" loading="lazy" />
+          </div>
+          {% endif %}
+        </section>
+
+        <section class="content-section" id="reviews">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Reviews</p>
+              <h2>What people are saying</h2>
+            </div>
+            <p class="section-subtitle">
+              Leave a quick review to help others decide if this tool is right for them.
+            </p>
+          </div>
+
+          {% if request.user.is_authenticated %}
+          <form class="review-form" method="post">
+            {% csrf_token %}
+            <input
+              type="hidden"
+              name="rating"
+              id="review-rating-value"
+              value="{% if user_review %}{{ user_review.rating }}{% endif %}"
+            />
+            <div
+              class="star-picker"
+              data-current-rating="{% if user_review %}{{ user_review.rating }}{% else %}0{% endif %}"
+              data-max="5"
+            >
+              <span class="label">Rating</span>
+              <div class="star-picker-buttons" role="radiogroup" aria-label="Select a rating">
+                {% for idx in star_indices %}
+                <button
+                  type="button"
+                  class="star-picker-button"
+                  data-index="{{ idx }}"
+                  aria-label="{{ idx }} star{% if idx > 1 %}s{% endif %}"
+                >
+                  <span class="star-base">☆</span>
+                  <span class="star-fill">★</span>
+                </button>
+                {% endfor %}
+              </div>
+              <p class="star-picker-value">
+                Selected:
+                <span
+                  id="star-picker-selected"
+                  data-default="Tap a star"
+                >
+                  {% if user_review %}{{ user_review.rating|floatformat:1 }}/5{% else %}Tap a star{% endif %}
+                </span>
+              </p>
+            </div>
+            <label>
+              <span class="label">Feedback</span>
+              <textarea
+                name="comment"
+                rows="4"
+                placeholder="Share what worked well or what could be better"
+                required
+              >{% if user_review %}{{ user_review.comment }}{% endif %}</textarea>
+            </label>
+            {% if error %}
+            <p class="form-error">{{ error }}</p>
+            {% endif %}
+            <div class="review-form-actions">
+              <button class="btn primary" type="submit">
+                {% if user_review %}Update review{% else %}Submit review{% endif %}
+              </button>
+            </div>
+          </form>
+          {% else %}
+          <p>
+            <a href="{{ signin_url }}">Sign in</a> to leave a review. Reviews help other engineers understand how this
+            product behaves in real workflows.
+          </p>
+          {% endif %}
+
+          <ul class="review-list">
+            {% for review in reviews %}
+            <li>
+              <div class="review-header">
+                <strong>{{ review.user.get_username }}</strong>
+                <span>{{ review.created_at|date:"M j, Y" }}</span>
+              </div>
+              <p class="review-rating" data-rating="{{ review.rating }}">
+                <span class="review-stars" style="--rating: {{ review.rating|floatformat:1 }};"></span>
+                {{ review.rating|floatformat:1 }} / 5
+              </p>
+              <p>{{ review.comment }}</p>
+            </li>
+            {% empty %}
+            <li class="muted">No reviews yet. Be the first to share your thoughts!</li>
+            {% endfor %}
+          </ul>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        Built for demos and QA spikes. <a href="/admin/">Log in</a> to seed the catalog or <a href="/meta">inspect the API</a>.
+      </footer>
+    </div>
+    <script src="/assets/js/product.js" defer></script>
+  </body>
+</html>

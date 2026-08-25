@@ -1,0 +1,50 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Django SQLite database
+db.sqlite3
+*.sqlite3
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment and local settings
+.env
+.env.*
+
+# IDE and editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Python tooling caches
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Static and media artifacts
+staticfiles/
+media/
+
+# macOS cruft
+._*
+
+# Xcode / iOS build artifacts
+ios-app/**/build/
+ios-app/**/DerivedData/
+ios-app/**/*.xcuserdata/
+ios-app/**/*.xcuserstate
+ios-app/**/*.xcworkspace/xcuserdata/
+ios-app/**/*.xcscmblueprint
+*.xcuserstate
+
+# Android build artifacts
+android-app/.gradle/
+android-app/build/
+android-app/app/build/
+
+# Logs
+*.log

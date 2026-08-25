@@ -1,0 +1,167 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}Fictoshop · Storefront{% endblock %}
+
+{% block content %}
+<section class="content-section accent">
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Welcome to FictoShop</h1>
+      <p>Your provider of sports equipment</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#catalog">Shop the catalog</a>
+        <a class="btn ghost" href="/docs">Explore the API</a>
+      </div>
+      {% if request.user.is_authenticated %}
+      <p class="muted small signed-in-banner">
+        Signed in as <strong>{{ request.user.get_username }}</strong>.
+        {% if request.user.is_staff %}
+        <a href="/admin/">Open the Django admin</a>.
+        {% endif %}
+      </p>
+      {% endif %}
+    </div>
+    <div class="hero-preview" aria-hidden="true">
+      <div class="hero-carousel" data-carousel>
+        <div class="hero-carousel-track">
+          <img
+            src="{% static 'css/images/swimming.jpg' %}"
+            alt="Competitive swimmer doing butterfly stroke"
+            loading="lazy"
+            onerror="this.onerror=null;this.src='{% static 'images/carousel/swim.svg' %}';"
+          />
+          <img
+            src="{% static 'css/images/snowboarding.jpg' %}"
+            alt="Snowboarder catching air on a sunny day"
+            loading="lazy"
+            onerror="this.onerror=null;this.src='{% static 'images/carousel/snow.svg' %}';"
+          />
+          <img
+            src="{% static 'css/images/boxing.jpg' %}"
+            alt="Two boxers sparring in a ring"
+            loading="lazy"
+            onerror="this.onerror=null;this.src='{% static 'images/carousel/boxing.svg' %}';"
+          />
+          <img
+            src="{% static 'css/images/soccer.jpg' %}"
+            alt="Soccer players competing for a header"
+            loading="lazy"
+            onerror="this.onerror=null;this.src='{% static 'images/carousel/soccer.svg' %}';"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content-section" id="catalog" aria-labelledby="catalog-title">
+  <div class="section-header">
+    <div>
+      <h2 id="catalog-title">Our products</h2>
+    </div>
+    <p class="section-subtitle">
+      <span id="product-status">Loading inventory…</span>
+    </p>
+  </div>
+  <div class="catalog-toolbar">
+    <label for="product-search">
+      <span class="label">Search catalog</span>
+      <input id="product-search" type="search" placeholder="Latency monitor, crash cart…" autocomplete="off" />
+    </label>
+    <label for="product-sort">
+      <span class="label">Sort by</span>
+      <select id="product-sort">
+        <option value="featured">Featured</option>
+        <option value="price-low">Price: Low to high</option>
+        <option value="price-high">Price: High to low</option>
+        <option value="stock-high">Stock level</option>
+      </select>
+    </label>
+    <label class="checkbox" for="product-in-stock">
+      <input id="product-in-stock" type="checkbox" />
+      <span>In stock only</span>
+    </label>
+  </div>
+  <div id="product-loading" class="loading-card">Loading products…</div>
+  <p id="product-empty" class="empty-state" hidden>Nothing matches your filters just yet.</p>
+  <div id="product-grid" class="product-grid" aria-live="polite" aria-busy="true"></div>
+</section>
+
+<section class="cart-layout" id="cart" aria-labelledby="cart-title">
+  <article class="content-section cart-panel">
+    <div class="section-header">
+      <div>
+        <h2 id="cart-title">Your shopping cart</h2>
+      </div>
+      <p class="section-subtitle">Change quantities or remove products directly from this panel.</p>
+    </div>
+    <div id="cart-loading" class="loading-card">Fetching cart details…</div>
+    <ul id="cart-items" class="cart-items" aria-live="polite" aria-busy="true"></ul>
+    <p id="cart-empty" class="empty-state">Your cart is empty. Start browsing and add something you like.</p>
+    <p id="cart-message" class="muted small" role="status" aria-live="polite"></p>
+  </article>
+  <aside class="cart-summary content-section accent" aria-label="Cart summary">
+    <h3>Order summary</h3>
+    <div class="cart-summary-row">
+      <span>Total items</span>
+      <strong id="cart-total-items">0</strong>
+    </div>
+    <div class="cart-summary-row">
+      <span>Grand total</span>
+      <strong id="cart-grand-total">$0.00</strong>
+    </div>
+    <div class="cart-actions">
+      <button id="clear-cart" class="btn ghost" type="button">Clear cart</button>
+      <button id="checkout" class="btn primary" type="button">Checkout</button>
+    </div>
+    <p class="muted small">
+      Need to seed products? Authenticate with the admin link and upload a product image straight from your workstation.
+    </p>
+  </aside>
+</section>
+
+<section class="content-section accent">
+  <div class="section-header">
+    <div>
+      <h2>Launch faster with curated recipes</h2>
+    </div>
+    <p class="section-subtitle">
+      Each batch of sample data ships with automation flows so you can wire CI/CD demos in an afternoon.
+    </p>
+  </div>
+  <div class="workflow-grid">
+    <article>
+      <h3>Product API</h3>
+      <p class="muted">
+        GET <code>/products</code> for catalog hydration, and manage inventory directly in the Django Admin at
+        <code>/admin/</code>.
+      </p>
+    </article>
+    <article>
+      <h3>Cart API</h3>
+      <p class="muted">
+        POST <code>/cart</code> with <code>product_id</code> and <code>quantity</code>. The backend clamps and validates stock for you.
+      </p>
+    </article>
+    <article>
+      <h3>Checkout</h3>
+      <p class="muted">
+        POST <code>/checkout</code> for a snapshot of the cart. It keeps tests light-weight while you stub payments.
+      </p>
+    </article>
+    <article>
+      <h3>Admin auth</h3>
+      <p class="muted">
+        Use the built-in Django admin with your superuser credentials to add, edit, or remove products.
+      </p>
+    </article>
+  </div>
+</section>
+<div id="app-toast" class="toast" role="status" aria-live="polite"></div>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script src="{% static 'js/storefront.js' %}" defer></script>
+{% endblock %}

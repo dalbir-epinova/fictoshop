@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Fictoshop{% endblock %}</title>
+    <meta
+      name="description"
+      content="A fast, API-driven storefront for curating quality engineering products backed by the Fictoshop API."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%235561ff' d='M4 10a2 2 0 0 1 2-2h20l-2 12H10l-2 6H4z'/%3E%3Ccircle cx='23' cy='26' r='3' fill='%233c46d0'/%3E%3Ccircle cx='13' cy='26' r='3' fill='%233c46d0'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="{% static 'css/index.css' %}" />
+    {% block head_extra %}{% endblock %}
+  </head>
+  <body data-api-base="">
+    <div class="page-shell">
+      <header class="content-section accent site-header" role="banner">
+        <a class="logo" href="/">FictoShop</a>
+        <nav id="nav" class="nav-links" aria-label="Primary">
+          <a href="#catalog">Catalog</a>
+          <a href="#cart">Cart</a>
+        </nav>
+        <div class="nav-actions">
+          {% if request.user.is_authenticated %}
+          <span class="nav-user">Signed in as {{ request.user.get_username }}</span>
+          <form class="logout-form" method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="btn primary small" type="submit">Log out</button>
+          </form>
+          {% else %}
+          <a class="btn primary small" href="/signin">Log in</a>
+          {% endif %}
+          <a class="btn ghost small" href="/meta">API meta</a>
+        </div>
+      </header>
+
+      <main>{% block content %}{% endblock %}</main>
+
+      <footer class="site-footer">
+        Built for demos and QA spikes. <a href="/admin/">Log in</a> to seed the catalog or <a href="/meta">inspect the API</a>.
+      </footer>
+    </div>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
