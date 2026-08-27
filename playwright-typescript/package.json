@@ -1,0 +1,19 @@
+{
+  "name": "fictoshop-playwright-typescript",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright TypeScript BDD test suite for Fictoshop",
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && cucumber-js",
+    "test:headless": "HEADED=false npm test",
+    "test:smoke": "npm run build && cucumber-js --tags '@smoke'",
+    "install:browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "13.2.1",
+    "@playwright/test": "1.62.1",
+    "@types/node": "24.10.13",
+    "typescript": "7.0.2"
+  }
+}

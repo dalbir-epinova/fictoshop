@@ -52,5 +52,11 @@ playwright-csharp/obj/
 playwright-csharp/TestResults/
 playwright-csharp/**/artifacts/
 
+# TypeScript test artifacts
+playwright-typescript/node_modules/
+playwright-typescript/dist/
+playwright-typescript/reports/
+playwright-typescript/artifacts/
+
 # Logs
 *.log
