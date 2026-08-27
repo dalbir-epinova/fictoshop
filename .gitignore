@@ -46,5 +46,11 @@ android-app/.gradle/
 android-app/build/
 android-app/app/build/
 
+# .NET test artifacts
+playwright-csharp/bin/
+playwright-csharp/obj/
+playwright-csharp/TestResults/
+playwright-csharp/**/artifacts/
+
 # Logs
 *.log
