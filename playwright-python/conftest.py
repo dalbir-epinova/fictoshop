@@ -1,7 +1,12 @@
 import os
+import sys
 from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 import pytest
 from playwright.sync_api import BrowserContext, Page, Playwright, expect
@@ -68,7 +73,7 @@ def app_base_url() -> str:
 
 @pytest.fixture(scope="session")
 def project_root() -> Path:
-    return Path(__file__).resolve().parent.parent
+    return PROJECT_ROOT
 
 
 @pytest.fixture

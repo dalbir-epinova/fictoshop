@@ -7,5 +7,9 @@ public static class TestSettings
          ?? "http://127.0.0.1:8000")
         .TrimEnd('/');
 
-    public static bool Headed => true;
+    public static bool Headed =>
+        !string.Equals(
+            Environment.GetEnvironmentVariable("HEADED"),
+            "false",
+            StringComparison.OrdinalIgnoreCase);
 }
